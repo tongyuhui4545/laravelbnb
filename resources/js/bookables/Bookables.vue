@@ -1,91 +1,61 @@
 <template>
-  <div>
-    <div v-if="loading">NBA is loading</div>
+<div>
+    <div v-if="loading">Data is loading</div>
     <div v-else>
-      <div class="row mb-4" v-for="row in rows" :key="row">
-        <div
-          class="col"
-          v-for="(bookable, column) in bookablesInRow(row)"
-          :key="'row' + row + column"
-        >
-          <bookable-list-item
-            :item-title="bookable.title"
-            :item-content="bookable.content"
-            v-bind:price="1000"
-          ></bookable-list-item>
+        <div class="row mb-4" v-for="row in rows" :key="'row' + row">
+            <div class="col" v-for="(bookable, column) in bookablesInRow(row)" :key="'row' + row + column">
+                <bookable-list-item :item-title="bookable.title" :item-description="bookable.description" v-bind:price="1000"></bookable-list-item>
+            </div>
+            <div class="col d-flex align-items-stretch" v-for="p in placeholdersInRow(row)" :key="'placeholder' + row + p">
+            </div>
         </div>
-        <div class="col" v-for="p in placeholdersInRow(row)" :key="'placeholder' + row + p">
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 </template>
 
 <script>
 import BookableListItem from "./BookableListItem";
 export default {
-  components: {
-    BookableListItem,
-  },
-  data() {
-    return {
-      bookables: null,
-      loading: false,
-      columns: 3,
-    };
-  },
-  computed: {
-    rows() {
-      return this.bookables === null
-        ? 0
-        : Math.ceil(this.bookables.length / this.columns);
+    components: {
+        BookableListItem,
     },
-  },
-  methods: {
-    bookablesInRow(row) {
-     return this.bookables.slice(
-            (row - 1) * this.columns,
-            row *this.columns);
+    data() {
+        return {
+            bookables: null,
+            loading: false,
+            columns: 3,
+        };
     },
-    placeholdersInRow(row) {
-     return this.columns - this.bookablesInRow(row).length;
-    }
-  },
-  created() {
-    this.loading = true;
-    setTimeout(() => {
-      this.bookables = [
-        {
-          title: "Cheap Villa !!!",
-          content: "A very cheap villa",
+    computed: {
+        rows() {
+            return this.bookables === null ?
+                0 :
+                Math.ceil(this.bookables.length / this.columns);
         },
-        {
-          title: "Cheap Villa 2",
-          content: "A very cheap villa 2",
+    },
+    methods: {
+        bookablesInRow(row) {
+            return this.bookables.slice(
+                (row - 1) * this.columns,
+                row * this.columns);
         },
-        {
-          title: "Cheap Villa 2",
-          content: "A very cheap villa 2",
-        },
-        {
-          title: "Cheap Villa 2",
-          content: "A very cheap villa 2",
-        },
-        {
-          title: "Cheap Villa 2",
-          content: "A very cheap villa 2",
-        },
-        {
-          title: "Cheap Villa 2",
-          content: "A very cheap villa 2",
-        },
-        {
-          title: "Cheap Villa 2",
-          content: "A very cheap villa 2",
-        },
-      ];
-      this.loading = false;
-    }, 2000);
-  },
-};
+        placeholdersInRow(row) {
+            return this.columns - this.bookablesInRow(row).length;
+        }
+    },
+    created() {
+        this.loading = true;
+
+        const p = new Promise((resolve, reject) => {
+            console.log(resolve);
+            console.log(reject);
+            setTimeout(() => resolve("Hello", 3000));
+        });
+        console.log(p);
+        const request = axios.get("/api/bookables").then(response => {
+            this.bookables = response.data;
+            this.loading = false;
+        });
+    },
+}
 </script>

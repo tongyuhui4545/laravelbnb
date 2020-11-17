@@ -60,6 +60,8 @@
 </style>
 
 <script>
+import {is422} from "./../shared/utils/response";
+
 export default {
   props: {
     bookableId: String
@@ -70,7 +72,7 @@ export default {
       to: null,
       loading: false,
       status: null,
-      errors: null
+      errors: null,
     };
   },
   methods: {
@@ -83,7 +85,7 @@ export default {
       ).then(response => {
         this.status = response.status;
       }).catch(error => {
-        if (422 === error.response.status) {
+        if (is422(error)) {
           this.errors = error.response.data.errors;
         }
         this.status = error.response.status;

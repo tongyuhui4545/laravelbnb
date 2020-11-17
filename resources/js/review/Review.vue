@@ -1,7 +1,6 @@
 <template >
 <div>
-  <div class="row" v-if="error"> Unknown erro </div>
-
+<fatal-error v-if="error"></fatal-error>
   <div class="row" v-else>
     <div :class="[{'col-md-4': twoColumns}, {'d-none': oneColumn}]">
       <div class="card">
@@ -32,9 +31,12 @@
             </div>
             <div class="formgroup">
                 <label for="content" class="text-muted">Describe your experience with</label>
-                <textarea name="content" rows="10" cols="30" class="form-control"></textarea>
+                <textarea name="content" rows="10" cols="30" class="form-control" v-model="review.content" :class="[{'is-invalid': errorFor('content')}]"></textarea>
+                <div class="invalid-feedback" v-for="(error, index) in errorFor('content')" :key="'content' + index">
+                  {{ error }}
+                </div>
             </div>
-            <button class="btn btn-lg btn-primary btn-block">Submit</button>
+            <button class="btn btn-lg btn-primary btn-block" @click.prevent="submit" :disabled="sending">Submit</button>
         </div>
       </div>
     </div>
@@ -46,32 +48,36 @@
 </template>
 
 <script>
-import {is404} from "./../shared/utils/response";
+import {is404, is422} from "./../shared/utils/response";
 
 export default {
     data() {
         return {
             review: {
+                id: null,
                 rating: 5,
                 content: null
             },
             existingReview: null,
             loading: false,
             booking: null,
-            error: false
+            error: false,
+            errors: null,
+            sending: false
         };
     },
     created() {
-      this.loading = true;
+      this.review.id = this.$route.params.id;
+      this.laoding = true;
         //1.If the review already exist
         axios
-            .get(`/api/reviews/${this.$route.params.id}`)
+            .get(`/api/reviews/${this.review.id}`)
             .then(response => {this.existingReview = response.data.data
             })
             .catch(err => {
                 if (is404(err)) {
                   return axios
-                  .get(`/api/booking-by-review/${this.$route.params.id}`)
+                  .get(`/api/booking-by-review/${this.review.id}`)
                   .then(response => {
                     this.booking = response.data.data;
                   }).catch(err => {
@@ -101,6 +107,34 @@ export default {
         twoColumns() {
           return this.loading || !this.alreadyReviewed;
         }
+    },
+    methods: {
+      submit() {
+        //3. store the review
+      this.errors = null;
+      this.sending = true;
+      axios
+      .post(`/api/reviews`, this.review)
+      .then(response => console.log(response))
+      .catch(err => {
+        if (is422(err)) {
+          const errors = err.response.data.errors;
+
+          if (errors["content"] && 1 ===  _.size(errors)) {
+            this.errors = errors;
+            return;
+          }
+        }
+
+        this.error = true;
+      })
+      .then(() => (this.sending = false));
+    },
+    errorFor(field) {
+      return null !== this.errors && this.errors[field]
+       ? this.errors[field]
+       : null;
     }
+  }
 };
 </script>

@@ -13,6 +13,8 @@ import StarRating from "./shared/components/StarRating";
 import FatalError from "./shared/components/FatalError";
 import Success from "./shared/components/Success";
 import ValidationErrors from "./shared/components/ValidationErrors";
+import Vuex from 'vuex';
+import definition from "./store";
 
 
 window.Vue = require("vue");
@@ -23,12 +25,18 @@ Vue.component("star-rating", StarRating);
 Vue.component("fatal-error", FatalError);
 Vue.component("success", Success);
 Vue.component("v-errors", ValidationErrors);
+Vue.use(Vuex);
 
+const store = new Vuex.Store(definition);
 
 const app = new Vue({
     el: "#app",
     router,
+    store,
     components: {
         "index": Index,
-    }
+    },
+    beforeCreate() {
+      this.$store.dispatch("loadStoredState");
+    },
 });

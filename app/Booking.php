@@ -14,6 +14,10 @@ class Booking extends Model
     {
         return $this->belongsTo(Bookable::class);
     }
+    public function address()
+    {
+        return $this->belongsTo(Address::class);
+    }
 
     public function review()
     {
@@ -28,7 +32,7 @@ class Booking extends Model
 
     public static function findByReviewKey(string $reviewKey): ?Booking
     {
-      return static::where('review_key', $reviewKey)->with('bookable')->get()->first();  
+      return static::where('review_key', $reviewKey)->with('bookable')->get()->first();
     }
 
     public static function boot()

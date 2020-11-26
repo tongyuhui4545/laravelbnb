@@ -10,7 +10,13 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+use Illuminate\Support\Facades\Auth;
 
+Route::middleware('auth')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+Auth::routes();
 
 Route::get('/{any?}', function () {
     return view('welcome');

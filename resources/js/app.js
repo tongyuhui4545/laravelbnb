@@ -36,7 +36,9 @@ const app = new Vue({
     components: {
         "index": Index,
     },
-    beforeCreate() {
+    async beforeCreate() {
       this.$store.dispatch("loadStoredState");
+
+      // await axios.get('/user');
     },
 });

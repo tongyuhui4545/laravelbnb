@@ -28,6 +28,18 @@ Vue.component("v-errors", ValidationErrors);
 Vue.use(Vuex);
 
 const store = new Vuex.Store(definition);
+window.axios.interceptors.response.use(
+  response => {
+    return response;
+  },
+  error => {
+    if (401 === error.response.status) {
+      store.dispatch("logout");
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 const app = new Vue({
     el: "#app",
@@ -38,7 +50,6 @@ const app = new Vue({
     },
     async beforeCreate() {
       this.$store.dispatch("loadStoredState");
-
-      // await axios.get('/user');
+      this.$store.dispatch("loadUser");
     },
 });
